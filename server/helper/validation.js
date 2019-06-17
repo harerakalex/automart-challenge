@@ -6,7 +6,6 @@ const signupValidation = Joi.object({
 	email: Joi.string().email({ minDomainAtoms: 2 }).min(3).required(),
 	address: Joi.string().min(3).max(50).required(),
 	password: Joi.string().min(6).max(15).required(),
-	is_admin: Joi.boolean().required()
 });
 
 // Sign in validation
