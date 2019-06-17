@@ -33,7 +33,6 @@ const updateCarPrice = {
 
 // validating order
 const orderValidation = Joi.object({
-	buyer_id: Joi.number().integer().required(),
     car_id: Joi.number().integer().required(),
     amount: Joi.number().precision(4).positive().min(2).required(),
 });
