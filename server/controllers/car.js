@@ -79,17 +79,22 @@ async fetch(req, res) {
  * @param {*} res 
  */
 async fetchId(req, res) {
-	const foundCar = cars.find(c => c.id === parseInt(req.params.id, 10));
-	if (!foundCar) {
-		return res.status(404).json({
+	const findCar = 'SELECT * FROM cars WHERE id = $1';
+    const id = parseInt(req.params.id, 10);
+    const foundCar = await pool.query(findCar, [id]);
+
+    if (!foundCar.rows[0]) {
+     	return res.status(404).json({
 			status: 404,
-			error: 'Could not find Car with a given ID',
-		});
-	}
-	return res.status(200).json({
-		status: 200,
-		data: foundCar,
-	});  
+			error: 'Could not find Car with a given ID'
+		}); 
+    } else {
+      res.status(200).json({
+        status: 200,
+        message: 'Successfully retrieved',
+        data: foundCar.rows[0],
+      });
+    }  
 }
 
 
@@ -265,7 +270,7 @@ async updateStatus(req, res) {
 
     return res.status(200).json({
     	status: 200,
-    	message: 'Price updated',
+    	message: 'Status updated',
     	data: updatedStatusCar
     });		  
 }
