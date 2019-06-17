@@ -188,11 +188,11 @@ async updatePrice(req, res) {
     const carId = parseInt(req.params.id, 10);
     const carToUpdate = await pool.query(updatePriceOfcar, [carId]);
 
-    if (req.userData.id != carToUpdate.rows[0].owner)
-    	return res.status(403).json({status: 403,error: 'Forbidden'});
-    
     if (!carToUpdate.rows[0])
     	return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
+
+    if (req.userData.id != carToUpdate.rows[0].owner)
+    	return res.status(403).json({status: 403,error: 'Forbidden'});
 
     const updateCar = 'UPDATE cars SET price = $1  WHERE id = $2';
     const values = [req.body.price, carId];
@@ -233,17 +233,41 @@ async updateStatus(req, res) {
         status: 400,
         error: errorMessage
       });
-	}else {
-		const updateCarStatus = cars.find(s => s.id === parseInt(req.params.id, 10));
-	    if (!updateCarStatus) 
-			return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
-		const markAsSold = req.body.status;
-		updateCarStatus.status = markAsSold;
-		res.status(200).json({
-			status: 200,
-			data: updateCarStatus
-		});
-	}		  
+	}
+
+	const id = parseInt(req.params.id, 10);
+	const updateStatusOfcar = 'SELECT * FROM cars WHERE id = $1';
+    const carId = parseInt(req.params.id, 10);
+    const markAsSold = await pool.query(updateStatusOfcar, [carId]);
+
+    if (!markAsSold.rows[0])
+    	return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
+
+    if (req.userData.id != markAsSold.rows[0].owner)
+    	return res.status(403).json({status: 403,error: 'Forbidden'});
+
+    const mark = 'UPDATE cars SET status = $1  WHERE id = $2';
+    const values = [req.body.status, carId];
+
+    await pool.query(mark, values);
+
+    const updatedStatusCar = {
+      id: markAsSold.rows[0].id,
+      owner: markAsSold.rows[0].owner,
+      manufacturer: markAsSold.rows[0].manufacture,
+      createdOn: markAsSold.rows[0].created_on,
+      state: markAsSold.rows[0].state,
+      status: markAsSold.rows[0].status,
+      price: req.body.status,
+      model: markAsSold.rows[0].model,
+      body_type: markAsSold.rows[0].body_type
+    };
+
+    return res.status(200).json({
+    	status: 200,
+    	message: 'Price updated',
+    	data: updatedStatusCar
+    });		  
 }
 
 /**
