@@ -1,6 +1,12 @@
 language: node_js
 node_js: 
   - "stable"
+services:
+  - postgresql
+
+before_install:
+  - psql -c 'create database testDb' -U postgres
+  
 script: npm test
 cache:
   directories:
