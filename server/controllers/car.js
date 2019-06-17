@@ -257,8 +257,8 @@ async updateStatus(req, res) {
       manufacturer: markAsSold.rows[0].manufacture,
       createdOn: markAsSold.rows[0].created_on,
       state: markAsSold.rows[0].state,
-      status: markAsSold.rows[0].status,
-      price: req.body.status,
+      price: markAsSold.rows[0].price,
+      status: req.body.status,
       model: markAsSold.rows[0].model,
       body_type: markAsSold.rows[0].body_type
     };
