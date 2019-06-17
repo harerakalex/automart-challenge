@@ -181,17 +181,43 @@ async updatePrice(req, res) {
         status: 400,
         error: errorMessage
       });
-	}else {
-		const updateCarPrice = cars.find(c => c.id === parseInt(req.params.id, 10));
-	    if (!updateCarPrice) 
-			return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
-		const newPrice = req.body.price;
-		updateCarPrice.price = newPrice;
-		res.status(200).json({
-			status: 200,
-			data: updateCarPrice,
-		});
-	}  
+	}
+
+	const id = parseInt(req.params.id, 10);
+	const updatePriceOfcar = 'SELECT * FROM cars WHERE id = $1';
+    const carId = parseInt(req.params.id, 10);
+    const carToUpdate = await pool.query(updatePriceOfcar, [carId]);
+
+    if (req.userData.id != carToUpdate.rows[0].owner)
+    	return res.status(403).json({status: 403,error: 'Forbidden'});
+    
+    if (!carToUpdate.rows[0])
+    	return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
+
+    const updateCar = 'UPDATE cars SET price = $1  WHERE id = $2';
+    const values = [req.body.price, carId];
+
+    await pool.query(updateCar, values);
+
+    const updatedCar = {
+      id: carToUpdate.rows[0].id,
+      owner: carToUpdate.rows[0].owner,
+      manufacturer: carToUpdate.rows[0].manufacture,
+      createdOn: carToUpdate.rows[0].created_on,
+      state: carToUpdate.rows[0].state,
+      status: carToUpdate.rows[0].status,
+      price: req.body.price,
+      model: carToUpdate.rows[0].model,
+      body_type: carToUpdate.rows[0].body_type
+    };
+
+    return res.status(200).json({
+    	status: 200,
+    	message: 'Price updated',
+    	data: updatedCar
+    });
+	
+	
 }
 
 /**
@@ -215,7 +241,7 @@ async updateStatus(req, res) {
 		updateCarStatus.status = markAsSold;
 		res.status(200).json({
 			status: 200,
-			data: updateCarStatus,
+			data: updateCarStatus
 		});
 	}		  
 }
