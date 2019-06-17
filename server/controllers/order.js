@@ -87,29 +87,41 @@ async update(req, res) {
         status: 400,
         error: errorMessage
       });
-	}else {
-		const paramId = parseInt(req.params.id, 36);
-	 	const foundOrder = orders.find(c => c.id === paramId);
-	    if (!foundOrder) 
-	    	return res.status(404).json({ status: 404, error: 'Could not find Car with a given ID' });
-	    // check if it is on pending stage
-	    
-	    const pending = foundOrder.status;
-	    if (pending != 'pending')
-	    	return res.status(400).json({ status: 400, error: 'You can update pending order only' });
-        
-        const old_price_offered = foundOrder.price_offered;
-	    const newPrice = req.body.price;
-	    foundOrder.price_offered = newPrice;
-
-	    // improving reponse
-	    foundOrder.new_price_offered = newPrice;
-        foundOrder.old_price_offered = old_price_offered;
-	    res.status(200).json({
-			status: 200,
-			data: foundOrder,
-		});
 	}
+
+	const updatePriceOfOrder = 'SELECT * FROM orders WHERE id = $1';
+    const orderId = parseInt(req.params.id, 10);
+    const orderToUpdate = await pool.query(updatePriceOfOrder, [orderId]);
+    
+
+    if (!orderToUpdate.rows[0])
+    	return res.status(404).json({status: 404,error: 'Could not find Orders with a given ID',});
+
+    if (orderToUpdate.rows[0].status != 'pending')
+    	return res.status(403).json({status: 403,error: 'You can update pending order only'});
+
+    if (req.userData.id != orderToUpdate.rows[0].buyer_id)
+    	return res.status(403).json({status: 403,error: 'You can update only your order'});
+
+    const updateOrder = 'UPDATE orders SET amount = $1  WHERE id = $2';
+    const values = [req.body.price, orderId];
+
+    await pool.query(updateOrder, values);
+
+    const updatedOrder = {
+      id: orderToUpdate.rows[0].id,
+      createdOn: orderToUpdate.rows[0].created_on,
+      buyer_id: orderToUpdate.rows[0].buyer_id,
+      car_id: orderToUpdate.rows[0].car_id,
+      price: req.body.price,
+      status: orderToUpdate.rows[0].status,
+    };
+
+    return res.status(200).json({
+    	status: 200,
+    	message: 'Price updated',
+    	data: updatedOrder
+    });
 }
 
 }
