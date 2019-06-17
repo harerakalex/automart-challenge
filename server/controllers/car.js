@@ -39,30 +39,60 @@ async fetch(req, res) {
 	const keys = Object.keys(queryParameter);
 
 	if (keys.length === 1) {
-		const query = cars.filter(c => c.status === carStatus);
-		if (query.length > 0) 
-			return res.status(200).json({ status: 200, data: query });
-		else 
-			return res.status(404).json({ status: 404, error: 'No search Data found for that query' });
-	} else if (keys.length === 3) {
-		const range = cars
-		.filter(p => p.status === carStatus && p.price >= minPrice && p.price <= maxPrice);
+		const findCar = 'SELECT * FROM cars WHERE status = $1';
+    	const foundAvailableCar = await pool.query(findCar, [carStatus]);
 
-		if (range.length > 0) return res.status(200).json({ status: 200, data: range });
-		else return res.status(404).json({ status: 404, error: 'No search Data found for that query' });
+    	if (!foundAvailableCar.rows[0]) {
+    		return res.status(404).json({
+    			status: 404,
+    			error: 'No search Data found for that query'
+    		}); 
+    	}
+    	res.status(200).json({
+    		status: 200,
+    		message: 'Successfully retrieved',
+    		data: foundAvailableCar.rows
+    	});
+	} else if (keys.length === 3) {
+		const findPrice = 'SELECT * FROM cars WHERE status = $1 AND price >= $2 AND price <= $3';
+    	const valuesCompare = [carStatus, minPrice, maxPrice];
+
+    	const rangeFound = await pool.query(findPrice, valuesCompare);
+    	if (!rangeFound.rows[0]) {
+    		return res.status(404).json({
+    			status: 404,
+    			error: 'No search Data found for that query'
+    		}); 
+    	}
+    	res.status(200).json({
+    		status: 200,
+    		message: 'Successfully retrieved',
+    		data: rangeFound.rows
+    	});
 	} else {
 		const token = req.headers.authorization;
 		if (token) {
 			try {
 				const decode = jwt.verify(token, process.env.SECRETKEY);
 
-				if (decode.admin) {
-					if (cars.length == 0)
-						return res.status(404).json({ status: 404, error: 'No car found yet' });
-					else
-						return res.status(200).json({ status: 200, data: cars });
+				if (decode.is_admin) {
+					const findCars = 'SELECT * FROM cars';
+    				const listAllCar = await pool.query(findCars);
+
+    				if (!listAllCar.rows[0]) {
+    					return res.status(404).json({
+    						status: 404,
+    						error: 'No car found yet'
+    					}); 
+    				}
+    				res.status(200).json({
+    					status: 200,
+    					message: 'Successfully retrieved',
+    					data: listAllCar.rows
+    				});
 				}
-				else  return res.status(403).json({ status: 403, error: 'Unathorized access.' });
+				else  
+					return res.status(403).json({ status: 403, error: 'Unathorized access.' });
 			} catch {
 				return res.status(401).json({ status: 401, error: 'Invalid token' });
 			}
