@@ -17,7 +17,7 @@ const signinValidation = Joi.object({
 // validating a car
 const validateCar = Joi.object({
 	owner: Joi.number().integer().required(),
-	manufacture: Joi.string().alphanum().min(3).required(),
+	manufacture: Joi.string().min(3).max(50).required(),
 	model: Joi.string().min(3).required(),
 	price: Joi.number().precision(4).positive().min(2).required(),
 	state: Joi.string().valid('new', 'used').required(),

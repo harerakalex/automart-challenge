@@ -6,6 +6,7 @@ import frauds from '../models/frauds';
 import cloudinary from 'cloudinary';
 import cloudinaryConfig from '../helper/cloudinaryConfig';
 import jwt from 'jsonwebtoken';
+import pool from '../config/db';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -106,44 +107,66 @@ async create(req, res) {
         status: 400,
         error: errorMessage
       });
-	}else{
-		if (!req.files.picture){
-			return res.status(400).json({
-				status: 400,
-				error: 'Image is required',
-			});
-		}else {
-			//image upload
-			const filename = req.files.picture.path;
-			cloudinary.v2.uploader.upload(filename,{tags:'Automart Images'},function(err,image){
-				if (err){ return res.status(404).json({status: 404,error: 'Invalid File'});}
-				else{
-					const imageUrl = image.secure_url;
-					const carId = parseInt(cars.length + 1, 10);
-					const userId = parseInt(req.body.owner, 10);
-					const newCar = {
-						id: carId,
-						owner: userId,
-						created_on: DateTime,
-						state: req.body.state,
-						status: 'available',
-						price: req.body.price,
-						manufacture: req.body.manufacture,
-						model: req.body.model,
-						body_type: req.body.body_type,
-						description: req.body.description,
-						image: imageUrl
-					};
+	}
+	if (!req.files.picture){
+		return res.status(400).json({
+			status: 400,
+			error: 'Image is required',
+		});
+	}
+	const filename = req.files.picture.path;
+	cloudinary.v2.uploader.upload(filename,{tags:'Automart Images'},async function(err,image){
+		if (err){ return res.status(404).json({status: 404,error: 'Invalid File'});}
+		else{
+			const imageUrl = image.secure_url;
+			const userId = parseInt(req.body.owner, 10);
+			const newCar = {
+				owner: userId,
+				created_on: DateTime,
+				state: req.body.state,
+				status: 'available',
+				price: req.body.price,
+				manufacture: req.body.manufacture,
+				model: req.body.model,
+				body_type: req.body.body_type,
+				description: req.body.description,
+				image: imageUrl
+			};
+			const insertCar = 'INSERT INTO cars(created_on, owner, manufacture, model, price, state, status, body_type, description, picture) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *';
+		    const results = await pool.query(insertCar,
+		      [
+		        newCar.created_on,
+		        newCar.owner,
+		        newCar.manufacture,
+		        newCar.model,
+		        newCar.price,
+		        newCar.state,
+		        newCar.status,
+		        newCar.body_type,
+		        newCar.description,
+		        newCar.image
+		      ]);
 
-					cars.push(newCar);
-					return res.status(201).json({
-						status: 201,
-						data: newCar
-					});
-				}
-			});
+		    const response = {
+		    	id: results.rows[0].id,
+		        created_on: results.rows[0].created_on,
+		        owner: results.rows[0].owner,
+		        manufacturer: results.rows[0].manufacture,
+		        model: results.rows[0].model,
+		        price: results.rows[0].price,
+		        state: results.rows[0].state,
+		        status: results.rows[0].status,
+		        image: results.rows[0].picture
+		    }
+		    return res.status(201).json({
+		    	status: 201,
+		    	message: 'Car Created successfully',
+		    	data: response
+		    });
 		}
-	}    
+	});
+	
+
 }
 /**
  * 
