@@ -311,16 +311,24 @@ async updateStatus(req, res) {
  * @param {*} res 
  */
 async delete(req, res) {
-	const carToDelete = cars.find(c => c.id === parseInt(req.params.id, 10));
-	if (!carToDelete) 
-		return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
+	const carSql = 'SELECT * FROM cars WHERE id = $1';
+    const idOfCar = parseInt(req.params.id, 10);
+    const carToDelete = await pool.query(carSql, [idOfCar]);
 
-	const index = cars.indexOf(carToDelete);
-	cars.splice(index, 1);
-	res.status(200).json({
+    if (!carToDelete.rows[0]) {
+      res.status(404).json({
+        status: 404,
+        error: 'Car Ad not found',
+      });
+      return;
+    }
+    const deleteCar = 'DELETE FROM cars WHERE id = $1';
+    await pool.query(deleteCar, [idOfCar]);
+
+    res.status(200).json({
 		status: 200,
 		data: "Car Ad successfully Deleted"
-	});    
+	});     
 }
 
 /**
