@@ -270,7 +270,6 @@ async updateStatus(req, res) {
       });
 	}
 
-	const id = parseInt(req.params.id, 10);
 	const updateStatusOfcar = 'SELECT * FROM cars WHERE id = $1';
     const carId = parseInt(req.params.id, 10);
     const markAsSold = await pool.query(updateStatusOfcar, [carId]);
@@ -345,21 +344,42 @@ async report(req, res) {
         error: errorMessage
       });
 	}
-	const carToReport = cars.find(c => c.id === parseInt(req.body.car_id, 10));
-	
-	if (!carToReport) 
-		return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
+	const selectCar = 'SELECT * FROM cars WHERE id = $1';
+    const carId = req.body.car_id;
+    const carToReport = await pool.query(selectCar, [carId]);
+
+    if (!carToReport.rows[0])
+    	return res.status(404).json({status: 404,error: 'Could not find Car with a given ID',});
+
+    if (req.userData.id == carToReport.rows[0].owner)
+    	return res.status(403).json({status: 403,error: 'You can not report your car'});
 
 	const newFraud = {
-		id: frauds.length + 1,
+		created_on: DateTime,
 		car_id: req.body.car_id,
 		reason: req.body.reason,
 		description: req.body.description
 	}
-	frauds.push(newFraud);
+
+	const insertFlag = 'INSERT INTO flags(created_on, car_id, reason, description) VALUES($1, $2, $3, $4) RETURNING *';
+    const results = await pool.query(insertFlag,
+      [
+        newFraud.created_on,
+        newFraud.car_id,
+        newFraud.reason,
+        newFraud.description
+      ]);
+    const response = {
+    	id: results.rows[0].id,
+	    created_on: results.rows[0].created_on,
+        car_id: results.rows[0].car_id,
+        reason: results.rows[0].reason,
+        description: results.rows[0].description
+    }
 	res.status(201).json({
 		status: 201,
-		data: newFraud
+		message: 'New fraud Created successfully',
+		data: response
 	});    
 }
 
