@@ -4,7 +4,7 @@
   "description": "online shopping app for cars, ....",
   "main": "app.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production npm run createTablesTests && cross-env NODE_ENV=production npm run admin && cross-env NODE_ENV=production babel-node ./server/server.js",
+    "start": "cross-env NODE_ENV=production npm run createTablesProduction && cross-env NODE_ENV=production npm run admin && cross-env NODE_ENV=production babel-node ./server/server.js",
     "dev": "cross-env NODE_ENV=development npm run admin && cross-env NODE_ENV=development nodemon --exec babel-node ./server/server.js",
     "test": "cross-env NODE_ENV=test npm run droptablesTests && cross-env NODE_ENV=test npm run createTablesTests && cross-env NODE_ENV=test npm run admin && cross-env NODE_ENV=test nyc --reporter=html --reporter=text mocha server/test/*js --require @babel/polyfill --require @babel/register --timeout 10000 --exit",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
@@ -12,6 +12,7 @@
     "createTablesTests": "cross-env NODE_ENV=test node --require @babel/register ./server/models/createTables.js",
     "droptablesTests": "cross-env NODE_ENV=test node --require @babel/register ./server/models/dropTables.js",
     "createTables": "cross-env NODE_ENV=development node  --require @babel/register ./server/models/createTables.js",
+    "createTablesProduction": "cross-env NODE_ENV=production node  --require @babel/register ./server/models/createTables.js",
     "dropTables": "cross-env NODE_ENV=development node --require @babel/register ./server/models/dropTables.js",
     "admin": "node --require @babel/register ./server/models/admin.js"
   },
