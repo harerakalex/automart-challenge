@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import { signupValidation, signinValidation } from '../helper/validation';
 import pool from '../config/db';
 import dotenv from 'dotenv';
-import '@babel/polyfill';
 
 
 
