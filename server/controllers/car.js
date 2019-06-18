@@ -1,8 +1,6 @@
 import Joi from 'joi';
 import { validateCar, updateCarPrice, updateCarStatus, queryValidation, fraudValidation } from '../helper/validation';
 import timeStamp from '../helper/timestamp';
-import cars from '../models/cars';
-import frauds from '../models/frauds';
 import cloudinary from 'cloudinary';
 import cloudinaryConfig from '../helper/cloudinaryConfig';
 import jwt from 'jsonwebtoken';

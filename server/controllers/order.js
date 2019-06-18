@@ -1,8 +1,6 @@
 import Joi from 'joi';
 import { orderValidation, updateOrderPrice } from '../helper/validation';
 import timeStamp from '../helper/timestamp';
-import cars from '../models/cars';
-// import orders from '../models/orders';
 import pool from '../config/db';
 
 const DateTime = timeStamp();

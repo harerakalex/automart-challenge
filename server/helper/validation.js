@@ -19,7 +19,7 @@ const validateCar = Joi.object({
 	owner: Joi.number().integer().required(),
 	manufacture: Joi.string().min(3).max(50).required(),
 	model: Joi.string().min(3).required(),
-	price: Joi.number().precision(4).positive().min(2).required(),
+	price: Joi.number().integer().min(2).required(),
 	state: Joi.string().valid('new', 'used').required(),
 	body_type: Joi.string().min(3).required(),
 	description: Joi.string().max(150).required(),
@@ -27,19 +27,19 @@ const validateCar = Joi.object({
 
 // validating price for update
 const updateCarPrice = {
-	price: Joi.number().precision(4).positive().min(2).required()
+	price: Joi.number().integer().min(2).required()
 };
 
 
 // validating order
 const orderValidation = Joi.object({
     car_id: Joi.number().integer().required(),
-    amount: Joi.number().precision(4).positive().min(2).required(),
+    amount: Joi.number().integer().min(2).required(),
 });
 
 // validating price update for the order
 const updateOrderPrice = {
-	price: Joi.number().precision(4).positive().min(2).required()
+	price: Joi.number().integer().min(2).required()
 };
 
 // validating status update for the car
@@ -49,8 +49,8 @@ const updateCarStatus = {
 
 const queryValidation = {
 	status: Joi.string().valid('available'),
-	min_price: Joi.number().precision(4).positive().min(2),
-	max_price: Joi.number().precision(4).positive().min(2),
+	min_price: Joi.number().integer().min(2),
+	max_price: Joi.number().integer().min(2),
 };
 
 const fraudValidation = {
