@@ -24,6 +24,6 @@ if (process.env.NODE_ENV === 'test') {
 // production db
 if (process.env.NODE_ENV === 'production') {
 	module.exports = new Pool({
-		connectionString: process.env.ORIGINAL_DB_URL,
+		connectionString: process.env.DATABASE_URL,
 	});
 }
