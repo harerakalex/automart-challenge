@@ -142,6 +142,69 @@ class User {
     }  
   }
 
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
+
+  async createAdmin(req, res) {
+    const { error } = Joi.validate(req.body, signupValidation);
+    if (error) {
+      return res.status(400).json({
+        status: 400,
+        error: error.details[0].message
+      });
+    } 
+
+    const email = req.body.email.trim();
+    const emailFound = 'SELECT * FROM users WHERE email = $1';
+    
+    const user = await pool.query(emailFound, [email]);
+    if (user.rows[0]) {
+     return res.status(409).json({ status: 409, error: 'Email Exists' });
+    }
+    
+    const newUser = {
+      email: req.body.email,
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      address: req.body.address,
+      password: bcrypt.hashSync(req.body.password, 10),
+      is_admin: true
+    };
+
+    const insert = 'INSERT INTO users(email, first_name, last_name, password, address, is_admin) VALUES($1, $2, $3, $4, $5, $6) RETURNING *';
+    const results = await pool.query(insert,
+      [
+      newUser.email,
+      newUser.first_name,
+      newUser.last_name,
+      newUser.password,
+      newUser.address,
+      newUser.is_admin,
+      ]);
+
+    const payloadAdmin = {
+        id: results.rows[0].id,
+        email: results.rows[0].email,
+        is_admin: results.rows[0].is_admin,
+      };
+    jwt.sign(payloadAdmin, process.env.SECRETKEY, { expiresIn: '24h' }, (err, token) => {
+      return res.status(201).json({
+        status: 201,
+        message: 'Admin Created successfully',
+        data: {
+          id: results.rows[0].id,
+          first_name: results.rows[0].first_name,
+          last_name: results.rows[0].last_name,
+          email: results.rows[0].email,
+          address: results.rows[0].address,
+          token: token,
+        }
+      });
+    });
+  }
   /**
  *
  * @param {*} req

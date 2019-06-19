@@ -400,3 +400,28 @@ describe('Admin delete a car', () => {
       });
   });
 });
+
+// Admin can create new admin
+const NewAdmin = {
+      first_name: 'Harera',
+      last_name: 'kalex',
+      email: 'admin2@gmail.com',
+      password: 'butare',
+      address: 'Rwanda',
+    };
+
+describe('Creating Admin', () => {
+  it('Admin should be created successfully', (done) => {
+    chai.request(server)
+      .post('/api/v1/auth/admin')
+      .send(NewAdmin)
+      .set('Authorization', token)
+      .end((err, res) => {
+        res.should.have.status(201);
+        res.should.be.an('object');
+        res.body.should.have.property('status').eql(201);
+        res.body.should.have.property('data');
+        done();
+      });
+  });
+});
