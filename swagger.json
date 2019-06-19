@@ -229,6 +229,9 @@
           "200": {
               "description": "success: Successfully retrieve a cars"
             },
+            "403": {
+              "description": "Error: Forbidden"
+            },
             "404": {
               "description": "Error: Car not found"
             },
@@ -260,6 +263,9 @@
         "responses": {
           "200": {
               "description": "success: Successfully retrieve a car"
+            },
+            "403": {
+              "description": "Error: Forbidden"
             },
             "404": {
               "description": "Error: Car not found"
@@ -298,6 +304,9 @@
           "200": {
               "description": "success: Ad Successfully deleted"
             },
+            "403": {
+              "description": "Error: Forbidden"
+            },
             "404": {
               "description": "Error: Car not found"
             },
@@ -327,8 +336,7 @@
             "in": "path",
             "description" :"car id",
             "required":true,
-            "type":"integer"
-            
+            "type":"integer"  
           },
           {
             "name": "new status of car posted",
@@ -347,6 +355,9 @@
           },
           "400": {
             "description": "Error: invalid value"
+          },
+          "403": {
+            "description": "Error: Forbidden"
           },
           "404": {
             "description": "Error: car not found"
@@ -401,6 +412,9 @@
           },
           "401": {
             "description": "Error: Authentication failed"
+          },
+          "403": {
+            "description": "Error: Forbidden"
           },
           "500": {
             "description": "Server Error"
@@ -464,7 +478,6 @@
             "in": "header",
             "description" :"The user token",
             "required":false
-
           },
           {
             "name": "purchase order",
@@ -488,6 +501,9 @@
           "401": {
             "description": "Error: Authentication failed"
           },
+          "403": {
+            "description": "Error: Forbidden"
+          },
           "500": {
             "description": "Server Error"
           }
@@ -507,7 +523,6 @@
             "in": "header",
             "description" :"The user token",
             "required":false
-
           },
           {
             "name": "id",
@@ -540,6 +555,108 @@
           "401": {
             "description": "Error: Authentication failed"
           },
+          "403": {
+            "description": "Error: Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/auth/admin": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Admin craete other new admin",
+        "description": "Create a new Admin",
+        "parameters": [
+          {
+            "name":"Authorization",
+            "in": "header",
+            "description" :"The admin token",
+            "required":false
+          },
+          {
+            "name": "users",
+            "in": "body",
+            "description": "admin to be created",
+            "schema": {
+              "$ref": "#/definitions/signup"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "success: successfully created"
+          },
+          "400": {
+            "description": "Error: invalid input"
+          },
+          "401": {
+            "description": "Error: Authentication failed"
+          },
+          "403": {
+            "description": "Error: Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/auth/{email}/resetpassword": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Reset the password",
+        "description": "User should reset password",
+        "parameters": [
+          {
+            "name":"Authorization",
+            "in": "header",
+            "description" :"The user token",
+            "required":false
+          },
+          {
+            "name":"email",
+            "in": "path",
+            "description" :"your email",
+            "required":true,
+            "type":"string"  
+          },
+          {
+            "name": "New Password",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/resetPassword"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "success: Order price is sucessfully updated"
+          },
+          "400": {
+            "description": "Error: invalid value"
+          },
+          "404": {
+            "description": "Error: order not found"
+          },
+          "401": {
+            "description": "Error: Authentication failed"
+          },
+          "403": {
+            "description": "Error: Forbidden"
+          },
           "500": {
             "description": "Server Error"
           }
@@ -556,8 +673,7 @@
         "last_name",
         "email",
         "password",
-        "address",
-        "is_admin"
+        "address"
       ],
       "type": "object",
       "properties": {
@@ -575,9 +691,6 @@
         },
         "address": {
           "type": "string"
-        },
-        "is_admin": {
-          "type": "boolean"
         }
       }
     },
@@ -591,6 +704,16 @@
         "email": {
           "type": "string"
         },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "resetPassword": {
+      "required": [
+        "password"
+      ],
+      "properties": {
         "password": {
           "type": "string"
         }
@@ -633,15 +756,11 @@
     },
     "order": {
       "required": [
-        "buyer_id",
         "car_id",
         "amount"
       ],
       "type": "object",
       "properties": {
-        "buyer_id": {
-          "type": "integer"
-        },
         "car_id": {
           "type": "integer"
         },
