@@ -15,4 +15,7 @@ router.post('/signin', user.login);
 // route for creating admin
 router.post('/admin', auth, admin, user.createAdmin);
 
+// reset password
+router.put('/:email/resetpassword', auth, user.resetPassword);
+
 export default router;
