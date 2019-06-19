@@ -425,3 +425,28 @@ describe('Creating Admin', () => {
       });
   });
 });
+
+
+
+/* --------------------------------------
+   Optional Feature
+   -------------------------------------- */
+const newPassword = {
+  password: 'butare',
+}
+
+describe('Reset password', () => {
+  it('Password should be reseted successfully', (done) => {
+    chai.request(server)
+      .put('/api/v1/auth/admin@gmail.com/resetpassword')
+      .send(newPassword)
+      .set('Authorization', token)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.be.an('object');
+        res.body.should.have.property('status').eql(200);
+        res.body.should.have.property('message');
+        done();
+      });
+  });
+});

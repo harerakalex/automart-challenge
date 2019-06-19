@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { signupValidation, signinValidation } from '../helper/validation';
+import { signupValidation, signinValidation, resetValidation } from '../helper/validation';
 import pool from '../config/db';
 import dotenv from 'dotenv';
 
@@ -203,6 +203,42 @@ class User {
           token: token,
         }
       });
+    });
+  }
+
+  /**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
+
+  async resetPassword(req, res) {
+    const { error } = Joi.validate(req.body, resetValidation);
+    if (error) {
+      return res.status(400).json({
+        status: 400,
+        error: error.details[0].message,
+      });
+    }
+    const query = 'SELECT * FROM users WHERE email = $1';
+    const email = req.params.email;
+    const findUser = await pool.query(query, [email]);
+
+    if (!findUser.rows[0])
+      return res.status(404).json({status: 404,error: `Could not find user with ${req.params.email} as email`});
+
+    if (req.userData.email != req.params.email)
+      return res.status(403).json({status: 403,error: 'Forbidden, Make sure it is your account'});
+
+    const newPassword = bcrypt.hashSync(req.body.password, 10);
+    const newValue = [newPassword, req.params.email];
+
+    const reset = 'UPDATE users SET password=$1 WHERE email=$2';
+    await pool.query(reset, newValue);
+
+    return res.status(200).send({
+      status: 200,
+      message: `User password with ${req.params.email} email is successfully reset`
     });
   }
   /**
