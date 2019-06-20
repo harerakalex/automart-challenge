@@ -9,8 +9,6 @@ const dropTables = `
  `;
 pool.query(dropTables).then(() => {
   pool.end();
-  console.log('tables deleted successfully');
 }).catch((err) => {
-  console.log(err);
   process.exit(0);
 });

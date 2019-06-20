@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { signupValidation, signinValidation, resetValidation } from '../helper/validation';
 import pool from '../config/db';
 import dotenv from 'dotenv';
+import Customize from '../helper/customize';
 
 
 
@@ -18,14 +19,9 @@ class User {
 
 
   async signup(req, res) {
-    const { error } = Joi.validate(req.body, signupValidation);
-    if (error) {
-      const errorMessage = error.details[0].message;
-      return res.status(400).json({
-        status: 400,
-        error: errorMessage,
-      });
-    }
+    const error = Customize.validator(req.body, signupValidation,res);
+    if (error) return;
+
     const email = req.body.email.trim();
     const emailFound = 'SELECT * FROM users WHERE email = $1';
     
@@ -44,42 +40,26 @@ class User {
     };
 
     const insert = 'INSERT INTO users(email, first_name, last_name, password, address, is_admin) VALUES($1, $2, $3, $4, $5, $6) RETURNING *';
-    const results = await pool.query(insert,
-      [
-      newUser.email,
-      newUser.first_name,
-      newUser.last_name,
-      newUser.password,
-      newUser.address,
-      newUser.is_admin,
-      ]);
+    const {rows} = await pool.query(insert,
+      [newUser.email,newUser.first_name,newUser.last_name,newUser.password,newUser.address,newUser.is_admin,]);
 
-    const payload = {
-        id: results.rows[0].id,
-        email: results.rows[0].email,
-        is_admin: results.rows[0].is_admin,
-      };
-    jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '24h' }, (err, token) => {
-      
-      const response = {
-          id: results.rows[0].id,
-          first_name: results.rows[0].first_name,
-          last_name: results.rows[0].last_name,
-          email: results.rows[0].email,
-          address: results.rows[0].address,
-          token: token
-        }
-      return res.status(201).json(
-      {
-       status: 201,
-       message: 'User Created successfully',
-       data: response
-      },
-      );
-    });
-      
-      
-    
+    const token = Customize.generateToken(rows[0].id, rows[0].email, rows[0].is_admin);
+
+    return res.status(201).json(
+    {
+     status: 201,
+     message: 'User Created successfully',
+     data: {
+        id: rows[0].id,
+        first_name: rows[0].first_name,
+        last_name: rows[0].last_name,
+        email: rows[0].email,
+        address: rows[0].address,
+        token: token
+      }
+    },
+    );
+   
   }
 
   /**
@@ -88,14 +68,8 @@ class User {
  * @param {*returns success if created} res
  */
   async login(req, res) {
-    const { error } = Joi.validate(req.body, signinValidation);
-    if (error) {
-      const errorMessage = error.details[0].message;
-      return res.status(400).json({
-        status: 400,
-        error: errorMessage,
-      });
-    }
+    const error = Customize.validator(req.body, signinValidation, res);
+    if (error) return;
 
     const userEmail = req.body.email.trim();
     const userPassword = req.body.password;
@@ -109,30 +83,21 @@ class User {
 
     const pass = bcrypt.compareSync(userPassword, foundUser.rows[0].password);
     if (pass) {
-      // delete foundUser.password;
-      const payload = {
-        id: foundUser.rows[0].id,
-        email: foundUser.rows[0].email,
-        is_admin: foundUser.rows[0].is_admin,
-      };
-
-      jwt.sign(payload, process.env.SECRETKEY, {expiresIn: '24h'}, (err, token) => {
-        
-        const response = {
+      const token = Customize.generateToken(foundUser.rows[0].id, foundUser.rows[0].email, foundUser.rows[0].is_admin); 
+      return res.status(200).json(
+      {
+        status: 200,
+        message: 'User Logged in successfully',
+        data: {
           id: foundUser.rows[0].id,
           first_name: foundUser.rows[0].first_name,
           last_name: foundUser.rows[0].last_name,
           email: foundUser.rows[0].email,
           address: foundUser.rows[0].address,
           token: token
-        }    
-        return res.status(200).json(
-        {
-          status: 200,
-          message: 'User Logged in successfully',
-          data: response
-        });
+        }
       });
+    
     }
     else{
       return res.status(401).json({
@@ -149,13 +114,8 @@ class User {
  */
 
   async createAdmin(req, res) {
-    const { error } = Joi.validate(req.body, signupValidation);
-    if (error) {
-      return res.status(400).json({
-        status: 400,
-        error: error.details[0].message
-      });
-    } 
+    const error = Customize.validator(req.body, signupValidation,res);
+    if (error) return;
 
     const email = req.body.email.trim();
     const emailFound = 'SELECT * FROM users WHERE email = $1';
@@ -184,25 +144,18 @@ class User {
       newUser.address,
       newUser.is_admin,
       ]);
-
-    const payloadAdmin = {
+    const token = Customize.generateToken(results.rows[0].id, results.rows[0].email, results.rows[0].is_admin);
+    return res.status(201).json({
+      status: 201,
+      message: 'Admin Created successfully',
+      data: {
         id: results.rows[0].id,
+        first_name: results.rows[0].first_name,
+        last_name: results.rows[0].last_name,
         email: results.rows[0].email,
-        is_admin: results.rows[0].is_admin,
-      };
-    jwt.sign(payloadAdmin, process.env.SECRETKEY, { expiresIn: '24h' }, (err, token) => {
-      return res.status(201).json({
-        status: 201,
-        message: 'Admin Created successfully',
-        data: {
-          id: results.rows[0].id,
-          first_name: results.rows[0].first_name,
-          last_name: results.rows[0].last_name,
-          email: results.rows[0].email,
-          address: results.rows[0].address,
-          token: token,
-        }
-      });
+        address: results.rows[0].address,
+        token: token,
+      }
     });
   }
 
@@ -213,13 +166,9 @@ class User {
  */
 
   async resetPassword(req, res) {
-    const { error } = Joi.validate(req.body, resetValidation);
-    if (error) {
-      return res.status(400).json({
-        status: 400,
-        error: error.details[0].message,
-      });
-    }
+    const error = Customize.validator(req.body, resetValidation, res);
+    if (error) return;
+
     const query = 'SELECT * FROM users WHERE email = $1';
     const email = req.params.email;
     const findUser = await pool.query(query, [email]);
@@ -241,15 +190,7 @@ class User {
       message: `User password with ${req.params.email} email is successfully reset`
     });
   }
-  /**
- *
- * @param {*} req
- * @param {*} res
- */
 
-  async logout(req, res) {
-
-  }
 }
 
 export default User;

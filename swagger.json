@@ -116,14 +116,8 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
 
-          },
-          {
-            "name": "owner",
-            "in": "formData",
-            "type": "integer",
-            "description": "owner"
           },
           {
             "name": "manufacture",
@@ -286,7 +280,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
             
           },
           {
@@ -328,7 +322,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
             
           },
           {
@@ -385,7 +379,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
 
           },
           {
@@ -434,7 +428,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
 
           },
           {
@@ -477,7 +471,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
           },
           {
             "name": "purchase order",
@@ -522,7 +516,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
           },
           {
             "name": "id",
@@ -576,7 +570,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The admin token",
-            "required":false
+            "required":true
           },
           {
             "name": "users",
@@ -621,7 +615,7 @@
             "name":"Authorization",
             "in": "header",
             "description" :"The user token",
-            "required":false
+            "required":true
           },
           {
             "name":"email",

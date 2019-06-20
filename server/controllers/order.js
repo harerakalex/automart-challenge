@@ -2,6 +2,7 @@ import Joi from 'joi';
 import { orderValidation, updateOrderPrice } from '../helper/validation';
 import timeStamp from '../helper/timestamp';
 import pool from '../config/db';
+import Customize from '../helper/customize';
 
 const DateTime = timeStamp();
 
@@ -15,14 +16,8 @@ class Order {
  * @param {*} res 
  */
 async create(req, res) {
-	const { error } = Joi.validate(req.body, orderValidation);
-	if (error) {
-		const errorMessage = error.details[0].message;
-		return res.status(400).json({
-        status: 400,
-        error: errorMessage
-      });
-	}
+	const error = Customize.validator(req.body, orderValidation, res);
+    if (error) return;
 
 	const car = 'SELECT * FROM cars WHERE id = $1';
     const carId = req.body.car_id;
@@ -78,14 +73,8 @@ async create(req, res) {
  * @param {*} res 
  */
 async update(req, res) {
-	const { error } = Joi.validate(req.body, updateOrderPrice);
-	if (error) {
-		const errorMessage = error.details[0].message;
-		return res.status(400).json({
-        status: 400,
-        error: errorMessage
-      });
-	}
+	const error = Customize.validator(req.body, updateOrderPrice, res);
+    if (error) return;
 
 	const updatePriceOfOrder = 'SELECT * FROM orders WHERE id = $1';
     const orderId = parseInt(req.params.id, 10);

@@ -47,9 +47,7 @@ const createTables = `
     )`;
 
 pool.query(createTables).then(() => {
-  console.log('tables created successfully');
   pool.end();
 }).catch((err) => {
-  console.log(err);
   process.exit(0);
 });
