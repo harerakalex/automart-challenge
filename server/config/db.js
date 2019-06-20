@@ -3,8 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-console.log(process.env.NODE_ENV);
-
 
 // Automart original db in development
 if (process.env.NODE_ENV === 'development') {

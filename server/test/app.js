@@ -107,7 +107,6 @@ const otherToken = jwt.sign(otherUser, process.env.SECRETKEY, { expiresIn: '24hr
 
 // if all field not completed will not post a car.
 const newCar = {
-      owner: 1,
       manufacture: 'toyota',
       model: 'Corolla',
       price: 1400,
@@ -281,7 +280,6 @@ const order = {
     };
 
 const newOtherCar = {
-      owner: 1,
       manufacture: 'toyota',
       model: 'Corolla',
       price: 1400,

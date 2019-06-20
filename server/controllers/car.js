@@ -6,6 +6,7 @@ import cloudinaryConfig from '../helper/cloudinaryConfig';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db';
 import dotenv from 'dotenv';
+import Customize from '../helper/customize';
 
 dotenv.config();
 
@@ -21,14 +22,9 @@ class Car {
  * @param {*} res 
  */
 async fetch(req, res) {
-	const { error } = Joi.validate(req.query, queryValidation);
-	if (error) {
-		const errorMessage = error.details[0].message;
-		return res.status(400).json({
-        status: 400,
-        error: errorMessage
-      });
-	}
+	const error = Customize.validator(req.body, queryValidation, res);
+  if (error) return;
+
 	const queryParameter = req.query;
 	const carStatus = queryParameter.status;
 	const minPrice = parseInt(queryParameter.min_price, 10);
@@ -133,14 +129,9 @@ async fetchId(req, res) {
  * @param {*} res 
  */
 async create(req, res) {
-	const { error } = Joi.validate(req.body, validateCar);
-	if (error) {
-		const errorMessage = error.details[0].message;
-		return res.status(400).json({
-        status: 400,
-        error: errorMessage
-      });
-	}
+	const error = Customize.validator(req.body, validateCar, res);
+  if (error) return;
+
 	if (!req.files.picture){
 		return res.status(400).json({
 			status: 400,
@@ -154,7 +145,7 @@ async create(req, res) {
 			const imageUrl = image.secure_url;
 			const userId = parseInt(req.body.owner, 10);
 			const newCar = {
-				owner: userId,
+				owner: req.userData.id,
 				created_on: DateTime,
 				state: req.body.state,
 				status: 'available',
@@ -207,14 +198,8 @@ async create(req, res) {
  * @param {*} res 
  */
 async updatePrice(req, res) {
-	const { error } = Joi.validate(req.body, updateCarPrice);
-	if (error) {
-		const errorMessage = error.details[0].message;
-		return res.status(400).json({
-        status: 400,
-        error: errorMessage
-      });
-	}
+	const error = Customize.validator(req.body, updateCarPrice, res);
+  if (error) return;
 
 	const id = parseInt(req.params.id, 10);
 	const updatePriceOfcar = 'SELECT * FROM cars WHERE id = $1';
@@ -259,14 +244,8 @@ async updatePrice(req, res) {
  * @param {*} res 
  */
 async updateStatus(req, res) {
-  	const { error } = Joi.validate(req.body, updateCarStatus);
-	if (error) {
-		const errorMessage = error.details[0].message;
-		return res.status(400).json({
-        status: 400,
-        error: errorMessage
-      });
-	}
+	const error = Customize.validator(req.body, updateCarStatus, res);
+  if (error) return;
 
 	const updateStatusOfcar = 'SELECT * FROM cars WHERE id = $1';
     const carId = parseInt(req.params.id, 10);
@@ -334,14 +313,9 @@ async delete(req, res) {
  * @param {*} res 
  */
 async report(req, res) {
-	const { error } = Joi.validate(req.body, fraudValidation);
-	if (error) {
-		const errorMessage = error.details[0].message;
-		return res.status(400).json({
-        status: 400,
-        error: errorMessage
-      });
-	}
+	const error = Customize.validator(req.body, fraudValidation, res);
+  if (error) return;
+
 	const selectCar = 'SELECT * FROM cars WHERE id = $1';
     const carId = req.body.car_id;
     const carToReport = await pool.query(selectCar, [carId]);

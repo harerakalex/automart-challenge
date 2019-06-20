@@ -3,7 +3,7 @@ import Joi from 'joi';
 const signupValidation = Joi.object({
 	first_name: Joi.string().alphanum().min(3).max(30).required(),
 	last_name: Joi.string().alphanum().min(3).required(),
-	email: Joi.string().email({ minDomainAtoms: 2 }).min(3).required(),
+	email: Joi.string().email({ minDomainAtoms: 2 }).required(),
 	address: Joi.string().min(3).max(50).required(),
 	password: Joi.string().min(6).max(15).required(),
 });
@@ -16,10 +16,9 @@ const signinValidation = Joi.object({
 
 // validating a car
 const validateCar = Joi.object({
-	owner: Joi.number().integer().required(),
 	manufacture: Joi.string().min(3).max(50).required(),
 	model: Joi.string().min(3).required(),
-	price: Joi.number().integer().min(2).required(),
+	price: Joi.number().integer().positive().required(),
 	state: Joi.string().valid('new', 'used').required(),
 	body_type: Joi.string().min(3).required(),
 	description: Joi.string().max(150).required(),
@@ -27,14 +26,14 @@ const validateCar = Joi.object({
 
 // validating price for update
 const updateCarPrice = {
-	price: Joi.number().integer().min(2).required()
+	price: Joi.number().integer().positive().required()
 };
 
 
 // validating order
 const orderValidation = Joi.object({
-    car_id: Joi.number().integer().required(),
-    amount: Joi.number().integer().min(2).required(),
+    car_id: Joi.number().integer().positive().required(),
+    amount: Joi.number().integer().positive().required(),
 });
 
 // validating price update for the order
@@ -49,12 +48,12 @@ const updateCarStatus = {
 
 const queryValidation = {
 	status: Joi.string().valid('available'),
-	min_price: Joi.number().integer().min(2),
-	max_price: Joi.number().integer().min(2),
+	min_price: Joi.number().integer().positive(),
+	max_price: Joi.number().integer().positive(),
 };
 
 const fraudValidation = {
-	car_id: Joi.number().integer().required(),
+	car_id: Joi.number().integer().positive().required(),
 	reason: Joi.string().min(5).max(100).required(),
 	description: Joi.string().min(10).max(300).required()
 }

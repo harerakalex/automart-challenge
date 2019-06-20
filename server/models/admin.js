@@ -22,9 +22,4 @@ pool.query(adAdmin,
   admin.password,
   admin.address,
   admin.is_admin,
-  ])
-.then(() => {
-  console.log('Admin created');
-}).catch((error) => {
-  console.log(error);
-});
+  ]);
